@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using System.Text;
 using DataAccess.Abstract;
 using Entities.Concrete;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Concrete.EntityFramework
 {
@@ -21,17 +22,32 @@ namespace DataAccess.Concrete.EntityFramework
 
         public void Add(Product entity)
         {
-            throw new NotImplementedException();
+            using (NorthwindContext context =new NorthwindContext() )
+            {
+                var addedEntity = context.Entry(entity);
+                addedEntity.State = EntityState.Added;
+                context.SaveChanges();
+            }
         }
 
         public void Update(Product entity)
         {
-            throw new NotImplementedException();
+            using (NorthwindContext context = new NorthwindContext())
+            {
+                var updatedEntity = context.Entry(entity);
+                updatedEntity.State = EntityState.Modified;
+                context.SaveChanges();
+            }
         }
 
         public void Delete(Product entity)
         {
-            throw new NotImplementedException();
+            using (NorthwindContext context = new NorthwindContext())
+            {
+                var deletedEntity = context.Entry(entity);
+                deletedEntity.State = EntityState.Deleted;
+                context.SaveChanges();
+            }
         }
     }
 }
