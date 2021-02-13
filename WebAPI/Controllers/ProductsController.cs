@@ -15,11 +15,18 @@ namespace WebAPI.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
+        private IProductService _productService;
+
+        public ProductsController(IProductService productService)
+        {
+            _productService = productService;
+        }
+
         [HttpGet]
         public List<Product> Get()
         {
-            IProductService productService = new ProductManager(new EfProductDal());
-            var result = productService.GetAll();
+            
+            var result = _productService.GetAll();
             return result.Data;
         }
     }
