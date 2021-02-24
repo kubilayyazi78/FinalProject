@@ -9,6 +9,7 @@ using Business.Constants;
 using Business.ValidationRules.FluentValidation;
 using Core.Aspects.Autofac.Validation;
 using Core.CrossCuttingConcerns.Validation;
+using Core.Utilities.Business;
 using Core.Utilities.Results;
 using Entities.DTOs;
 using FluentValidation;
@@ -18,9 +19,11 @@ namespace Business.Concrete
     public class ProductManager : IProductService
     {
         IProductDal _productDal;
-        public ProductManager(IProductDal productDal)
+        ICategoryService _categoryService;
+        public ProductManager(IProductDal productDal, ICategoryService categoryService)
         {
             _productDal = productDal;
+            _categoryService = categoryService;
         }
         public IDataResult<List<Product>> GetAll()
         {
@@ -64,20 +67,16 @@ namespace Business.Concrete
         [ValidationAspect(typeof(ProductValidator))]
         public IResult Add(Product product)
         {
+            IResult result = BusinessRule.Run(CheckIfProductNameExists(product.ProductName),
+                  CheckIfProductCountOfCategoryCorrect(product.CategoryId), CheckIfCategoryLimitExceded());
 
-            if (CheckIfProductCountOfCategoryCorrect(product.CategoryId).Success)
+            if (result != null)
             {
-
-                if (CheckIfProductNameExists(product.ProductName).Success)
-                {
-                    _productDal.Add(product);
-                    return new SuccessResult(Messages.ProductAdded);
-                }
-
-
+                return result;
             }
+            _productDal.Add(product);
+            return new SuccessResult(Messages.ProductAdded);
 
-            return new ErrorResult();
         }
         [ValidationAspect(typeof(ProductValidator))]
         public IResult Update(Product product)
@@ -109,6 +108,19 @@ namespace Business.Concrete
             }
 
             return new SuccessResult();
+        }
+
+        private IResult CheckIfCategoryLimitExceded()
+        {
+            var result = _categoryService.GetAll();
+
+            if (result.Data.Count >= 15)
+            {
+                return new ErrorResult(Messages.CategoryLimitExceded);
+            }
+
+            return new SuccessResult();
+
         }
     }
 }

@@ -17,7 +17,7 @@ namespace ConsoleUI
         private static void CategoryTest()
         {
             ICategoryService categoryService = new CategoryManager(new EfCategoryDal()); //IoC
-            foreach (var category in categoryService.GetAll())
+            foreach (var category in categoryService.GetAll().Data)
             {
                 Console.WriteLine(category.CategoryName);
             }
@@ -25,7 +25,7 @@ namespace ConsoleUI
 
         private static void ProductTest()
         {
-            ProductManager productManager = new ProductManager(new EfProductDal());
+            ProductManager productManager = new ProductManager(new EfProductDal(),new CategoryManager(new EfCategoryDal()));
 
             //foreach (var product in productManager.GetByUnitPrice(50, 100))
             //{
