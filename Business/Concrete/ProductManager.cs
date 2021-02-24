@@ -3,6 +3,7 @@ using DataAccess.Abstract;
 using Entities.Concrete;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
@@ -63,9 +64,51 @@ namespace Business.Concrete
         [ValidationAspect(typeof(ProductValidator))]
         public IResult Add(Product product)
         {
-          
-            _productDal.Add(product);
-            return new SuccessResult(Messages.ProductAdded);
+
+            if (CheckIfProductCountOfCategoryCorrect(product.CategoryId).Success)
+            {
+
+                if (CheckIfProductNameExists(product.ProductName).Success)
+                {
+                    _productDal.Add(product);
+                    return new SuccessResult(Messages.ProductAdded);
+                }
+
+
+            }
+
+            return new ErrorResult();
+        }
+        [ValidationAspect(typeof(ProductValidator))]
+        public IResult Update(Product product)
+        {
+            throw new NotImplementedException();
+        }
+
+        private IResult CheckIfProductCountOfCategoryCorrect(int categoryId)
+        {
+            var categoryCount = _productDal.GetAll(x => x.CategoryId == categoryId).Count;
+
+            if (categoryCount >= 15)
+            {
+                return new ErrorResult(Messages.ProductCountOfCategoryError);
+            }
+
+            return new SuccessResult();
+        }
+
+        private IResult CheckIfProductNameExists(string productName)
+        {
+            var result = _productDal.GetAll(x => x.ProductName == productName).Any();
+
+            if (result)
+            {
+
+                return new ErrorResult(Messages.ProductNameAlreadyExists);
+
+            }
+
+            return new SuccessResult();
         }
     }
 }
