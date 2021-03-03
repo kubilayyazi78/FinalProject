@@ -127,5 +127,10 @@ namespace Business.Concrete
             return new SuccessResult();
 
         }
+
+        public IResult AddTransactionalTest(Product product)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
