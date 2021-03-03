@@ -8,6 +8,7 @@ using System.Text;
 using Business.BusinessAspects.Autofac;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
+using Core.Aspects.Autofac.Caching;
 using Core.Aspects.Autofac.Validation;
 using Core.CrossCuttingConcerns.Validation;
 using Core.Utilities.Business;
@@ -26,6 +27,7 @@ namespace Business.Concrete
             _productDal = productDal;
             _categoryService = categoryService;
         }
+        [CacheAspect()]
         public IDataResult<List<Product>> GetAll()
         {
             //İş Kodları.
@@ -58,7 +60,7 @@ namespace Business.Concrete
 
 
         }
-
+        [CacheAspect()]
         public IDataResult<Product> GetById(int productId)
         {
             return new SuccessDataResult<Product>(_productDal.Get(p => p.ProductId == productId));
@@ -66,6 +68,7 @@ namespace Business.Concrete
 
         [SecuredOperation("product.add")]
         [ValidationAspect(typeof(ProductValidator))]
+        [CacheRemoveAspect("IProductService.Get")]
         public IResult Add(Product product)
         {
             IResult result = BusinessRule.Run(CheckIfProductNameExists(product.ProductName),
@@ -80,6 +83,7 @@ namespace Business.Concrete
 
         }
         [ValidationAspect(typeof(ProductValidator))]
+        [CacheRemoveAspect("IProductService.Get")]
         public IResult Update(Product product)
         {
             throw new NotImplementedException();
